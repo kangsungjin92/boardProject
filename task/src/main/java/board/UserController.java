@@ -44,7 +44,7 @@ public class UserController {
 			ip = req.getRemoteAddr();
 			session.setAttribute("ip", ip);
 		}
-		mav.setViewName("board");
+		mav.setViewName("redirect:/board.do?pageNum=1");
 		return mav;
 	}
 	
@@ -57,7 +57,7 @@ public class UserController {
 	}
 	
 	@RequestMapping("signUpProc.do")
-	public ModelAndView signUpProc(HttpServletRequest req, UserVo vo, String pageNum) {
+	public ModelAndView signUpProc(HttpServletRequest req, UserVo vo) {
 		ModelAndView mav = new ModelAndView();
 		System.out.println("아이디 : "+vo.getUser_id());
 		System.out.println("비밀번호 : "+vo.getUser_password());
@@ -70,14 +70,14 @@ public class UserController {
 	}
 	
 	@RequestMapping("loginProc.do")
-	public ModelAndView loginProc(UserVo vo, HttpServletRequest req, String pageNum) {
+	public ModelAndView loginProc(UserVo vo, HttpServletRequest req) {
 		ModelAndView mav = new ModelAndView();
 		UserVo returnVo = service.loginValidationService(vo);
 		if(returnVo!=null) {
 			HttpSession session = req.getSession();
 			session.setAttribute("id", returnVo.getUser_id());
 			session.setAttribute("user_no", returnVo.getUser_id());
-			mav.setViewName("board");
+			mav.setViewName("redirect:/board.do?pageNum=1");
 			return mav;
 		}
 		mav.setViewName("login");

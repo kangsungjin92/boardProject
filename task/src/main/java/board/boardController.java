@@ -24,5 +24,12 @@ public class boardController {
 		return mav;
 	}
 	
+	@RequestMapping("board.do")
+	public ModelAndView board(HttpServletRequest req, int pageNum) {
+		ModelAndView mav = new ModelAndView();
+		
+		return mav;
+	}
+	
 	
 }
