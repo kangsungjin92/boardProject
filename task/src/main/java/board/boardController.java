@@ -20,6 +20,7 @@ public class boardController {
 		HttpSession session = req.getSession(false);
 		session.invalidate();
 		mav.setViewName("login");
+		
 		return mav;
 	}
 	
