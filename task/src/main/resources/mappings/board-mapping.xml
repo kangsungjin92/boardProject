@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="boardMapper">
+	
+	<select id="getBoardCnt" resultType="Integer">
+		SELECT COUNT(BOARD_NO) AS totalCount FROM BOARD
+	</select>
+	
+		
+	<select id="getBoardListMapper" parameterType="cri" resultType="boardVo">
+		<![CDATA[
+		SELECT * FROM(
+    		SELECT BOARD_NO,BOARD_TITLE, BOARD_CONTENT, BOARD_REGDATE, VIEWCNT, REF, STEP, DEPTH, BOARD_PASSWORD, rownum as rnum 
+    		FROM(
+    			SELECT BOARD_NO,BOARD_TITLE, BOARD_CONTENT, BOARD_REGDATE, VIEWCNT, REF, STEP, DEPTH, BOARD_PASSWORD
+    			FROM BOARD ORDER BY REF DESC, STEP ASC
+        	)
+    	)WHERE RNUM >= #{startRow} AND RNUM <= #{startRow}+9
+		
+		 ]]> 
+	</select>
+</mapper>

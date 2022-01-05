@@ -10,10 +10,13 @@
 		<typeAlias type="blueup.admin.vo.AdminCategoryDetailVo" alias="admincategorydetailvo"/> -->
 		<typeAlias type="board.vo.UserVo" alias="userVo"/>
 		<typeAlias type="board.vo.BoardVo" alias="boardVo"/>
+		<typeAlias type="board.Criteria" alias="cri"/>
+		<typeAlias type="board.vo.BoardVo" alias="boardVo"/>
+		
 		
 	</typeAliases>
 	<mappers>
-		<mapper resource="mappings/user-mapping.xml" />
+		<mapper resource="mappings/board-mapping.xml" />
 		<!-- <mapper resource="mappings/product-mapping.xml" />
 		<mapper resource="mappings/stock-mapping.xml" />
 		<mapper resource="mappings/cart-mapping.xml" /> -->
