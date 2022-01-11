@@ -13,13 +13,122 @@
 	<select id="getBoardListMapper" parameterType="cri" resultType="boardVo">
 		<![CDATA[
 		SELECT * FROM(
-    		SELECT BOARD_NO,BOARD_TITLE, BOARD_CONTENT, BOARD_REGDATE, VIEWCNT, REF, STEP, DEPTH, BOARD_PASSWORD, rownum as rnum 
+    		SELECT BOARD_NO,BOARD_TITLE, BOARD_CONTENT, BOARD_REGDATE, VIEWCNT, REF, STEP, DEPTH, BOARD_PASSWORD, REPLY, KILL, BOARD_WRITER, ROWNUM as rnum 
     		FROM(
-    			SELECT BOARD_NO,BOARD_TITLE, BOARD_CONTENT, BOARD_REGDATE, VIEWCNT, REF, STEP, DEPTH, BOARD_PASSWORD
+    			SELECT BOARD_NO,BOARD_TITLE, BOARD_CONTENT, BOARD_REGDATE, VIEWCNT, REF, STEP, DEPTH, BOARD_PASSWORD, REPLY, BOARD_WRITER, KILL
     			FROM BOARD ORDER BY REF DESC, STEP ASC
         	)
     	)WHERE RNUM >= #{startRow} AND RNUM <= #{startRow}+9
 		
 		 ]]> 
 	</select>
+	
+	<insert id="writeBoard" parameterType="boardVo">
+		INSERT INTO BOARD VALUES(
+			BOARD_SEC.NEXTVAL, #{board_title}, #{board_content}, SYSDATE, 0, NVL((SELECT MAX(REF)+1 FROM BOARD),0),
+			0,0, #{board_password}, #{reply}, 'n', #{board_writer}
+		)
+	</insert>
+	
+	<select id="getContent" parameterType="int" resultType="boardVo">
+		SELECT * FROM BOARD WHERE BOARD_NO = #{board_no}
+	</select>
+	
+	<update id="addViewCnt" parameterType="int">
+		UPDATE BOARD SET VIEWCNT = VIEWCNT+1 WHERE BOARD_NO = #{board_no}
+	</update>
+	
+	<delete id="delete" parameterType="int">
+		DELETE FROM BOARD WHERE BOARD_NO = #{board_no}
+	</delete>
+	
+	<update id="deleteWithReply" parameterType="int">
+		UPDATE BOARD SET BOARD_TITLE = '삭제된 게시물입니다', BOARD_PASSWORD = 'deleted'
+		WHERE BOARD_NO = #{board_no}
+	</update>
+	
+	<update id="kill" parameterType="int">
+		UPDATE BOARD SET KILL = 'y' WHERE BOARD_NO = #{board_no}
+	</update>
+	
+	<select id="checkPassword" parameterType="hashmap" resultType="boardVo">
+		SELECT BOARD_PASSWORD FROM BOARD WHERE BOARD_NO = #{board_no} AND BOARD_PASSWORD = #{board_password}
+	</select>  
+	
+	<select id="getRefStepDepth" parameterType="boardVo" resultType="boardVo">
+		SELECT REF, STEP, DEPTH FROM BOARD
+		WHERE BOARD_NO = #{board_no}
+	</select>
+	
+	<update id="stepUp" parameterType="hashmap">
+		UPDATE BOARD SET STEP = STEP+1
+		WHERE REF = #{ref} AND STEP > #{step}
+	</update>
+	
+	<update id="selfStepUp" parameterType="boardVo">
+		UPDATE BOARD SET STEP = STEP+1, DEPTH = DEPTH+1
+		WHERE BOARD_NO = #{board_no}
+	</update>
+	
+	<insert id="writeReply" parameterType="boardVo">
+		INSERT INTO BOARD VALUES(
+			BOARD_SEC.NEXTVAL, #{board_title}, #{board_content}, SYSDATE, 0, #{ref},#{step},
+			#{depth}, #{board_password}, #{reply}, 'n'
+		)
+	</insert>
+	
+	<update id="processUp">
+		ALTER system SET processes=300 scope=spfile
+	</update>
+	
+	
+	<update id="modifyContent" parameterType="boardVo">
+		UPDATE BOARD SET BOARD_TITLE = #{board_title}, BOARD_CONTENT = #{board_content} WHERE BOARD_NO = #{board_no}
+	</update>
+	
+	<update id="replyOrNot" parameterType="boardVo">
+		UPDATE BOARD SET REPLY = #{reply} WHERE BOARD_NO = #{board_no}
+	</update>
+	
+	<select id="search" parameterType="hashmap" resultType="boardVo">
+	<![CDATA[
+		SELECT * FROM(
+    		SELECT BOARD_NO,BOARD_TITLE, BOARD_CONTENT, BOARD_REGDATE, VIEWCNT, REF, STEP, DEPTH, BOARD_PASSWORD, REPLY, KILL ,ROWNUM as rnum 
+    		FROM(
+    			SELECT BOARD_NO,BOARD_TITLE, BOARD_CONTENT, BOARD_REGDATE, VIEWCNT, REF, STEP, DEPTH, BOARD_PASSWORD, REPLY, KILL
+    			FROM BOARD WHERE BOARD_TITLE LIKE '%'||#{search}||'%' ORDER BY REF DESC, STEP ASC
+        	)
+    	)WHERE RNUM >= #{startRow} AND RNUM <= #{startRow}+9
+		
+		 ]]> 
+	</select>
+	
+	<select id="searchCount" parameterType="String" resultType="Integer">
+		SELECT COUNT(BOARD_NO) FROM BOARD WHERE BOARD_TITLE LIKE '%'||#{search}||'%'
+	</select>
+	
+	<select id="getReplies" parameterType="boardVo" resultType="replyVo">
+		SELECT * FROM REPLY WHERE BOARD_NO = #{board_no} order by REF ASC
+	</select>
+	
+	<insert id="writeReplyInContent" parameterType="replyVo">
+		INSERT INTO REPLY VALUES(REPLY_SEQ.NEXTVAL, #{board_no}, #{reply_content}, #{reply_password}, SYSDATE, 
+		NVL((SELECT MAX(REF)+1 FROM REPLY),0), 0, 0)
+	</insert>
+	
+	<select id="replyModifyProc" parameterType="hashmap" resultType="replyVo">
+		SELECT * FROM REPLY WHERE REPLY_NO=#{reply_no} AND REPLY_PASSWORD=#{reply_password}
+	</select>
+	
+	<update id="replyUpdate" parameterType="hashmap">
+		UPDATE REPLY SET REPLY_CONTENT = #{reply_content} WHERE BOARD_NO = #{board_no} AND REPLY_NO = #{reply_no}
+	</update>
+	
+	<delete id="deleteReply" parameterType="hashmap">
+		DELETE FROM REPLY WHERE BOARD_NO = #{board_no} AND REPLY_NO = #{reply_no}
+	</delete>
+	
+	<delete id="deleteReplyWIthDeleteContent" parameterType="int">
+		DELETE FROM REPLY WHERE BOARD_NO = #{board_no}
+	</delete>
 </mapper>

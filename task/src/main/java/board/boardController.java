@@ -7,16 +7,18 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.omg.PortableInterceptor.ClientRequestInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import board.service.boardService;
 import board.vo.BoardVo;
-import board.vo.UserVo;
+import board.vo.ReplyVo;
 
 @Controller
 public class boardController {
@@ -29,34 +31,28 @@ public class boardController {
 	 * 
 	 * return mav; }
 	 */
-	
+
 	@RequestMapping("board.do")
-	public ModelAndView board(@RequestParam(required=false) Integer pageNum) {
+	public ModelAndView board(@RequestParam(required = false) Integer pageNum) {
 		ModelAndView mav = new ModelAndView();
 		List<BoardVo> boardList;
-		System.out.println("현재 페이지 : "+ pageNum.toString());
-		if(pageNum == null) {
-			pageNum=1;
+		if (pageNum == null) {
+			pageNum = 1;
 		}
 		int page = pageNum;
-		
+
 		Criteria cri = new Criteria();
 		cri.setPage(page);
 		cri.setPageStart();
-		System.out.println("cri.getPage : "+cri.getPage());
-		System.out.println("cri.getPerPageNum : "+cri.getPerPageNum());
-		System.out.println("cri.getStartRow : "+cri.getStartRow());
-		
+
 		int boardCnt = service.getBoardCountService();
-		System.out.println("boardCnt : "+ boardCnt);
 		PageMaker pm = new PageMaker();
 		pm.setCri(cri);
 		pm.setTotalCount(boardCnt);
-		System.out.println("startPgae : "+pm.getStartPage());
-		System.out.println("endPgae : "+pm.getEndPage());
 
 		boardList = service.getBoardListService(cri);
 		
+		mav.addObject("pageNum", pageNum);
 		mav.addObject("cri", cri);
 		mav.addObject("pm", pm);
 		mav.addObject("boardList", boardList);
@@ -64,19 +60,336 @@ public class boardController {
 		mav.setViewName("board");
 		return mav;
 	}
-	
-	@RequestMapping("boardWrite")
-	public ModelAndView boardWrite(@RequestParam(required=false) Integer board_no, int pageNum) {
+
+	@RequestMapping("boardWrite.do")
+	public ModelAndView boardWrite(@RequestParam(required = false) Integer board_no, int pageNum) {
 		ModelAndView mav = new ModelAndView();
-		if(board_no == null) {
+		if (board_no == null) {
 			mav.setViewName("writeBoard");
-		}else {
-			mav.setViewName("redirect:/jin/board.do?board_no="+board_no);
+		} else {
+			mav.setViewName("redirect:/replyBoard.do?board_no=" + board_no + "&pageNum=" + pageNum);
+			return mav;
 		}
 		mav.addObject("pageNum", pageNum);
-		
+
 		return mav;
 	}
-	
-	
+
+	@RequestMapping("boardWriteProc.do")
+	public ModelAndView writeProc(BoardVo vo) {
+		ModelAndView mav = new ModelAndView();
+		System.out.println("board_title : " + vo.getBoard_title());
+		System.out.println("board_content : " + vo.getBoard_content());
+		service.writeBoardService(vo);
+		mav.setViewName("redirect:/board.do?pageNum=1");
+		return mav;
+	}
+
+	@RequestMapping("getContentProc.do")
+	public ModelAndView getContentProc(int board_no, int pageNum) {
+		ModelAndView mav = new ModelAndView();
+
+		mav.setViewName("redirect:/getContent.do?board_no=" + board_no + "?pageNumber=" + pageNum);
+		return mav;
+	}
+
+	@RequestMapping("getContent.do")
+	public ModelAndView getContent(int board_no, int pageNum) {
+		ModelAndView mav = new ModelAndView();
+		BoardVo vo = service.getContentService(board_no);
+		List<ReplyVo> replyVo = service.getRepliesService(vo);
+		for (ReplyVo re : replyVo) {
+			System.out.println("가져온 댓글 : " + re.getReply_content());
+		}
+		System.out.println("가져온 게시물 제목 : " + vo.getBoard_title());
+		mav.addObject("replyList", replyVo);
+		mav.addObject("pageNum", pageNum);
+		mav.addObject("content", vo);
+		mav.setViewName("getContent");
+		return mav;
+	}
+
+	@RequestMapping("deleteBoard.do")
+	public ModelAndView deleteBoard(int pageNum, int board_no, String reply) {
+		ModelAndView mav = new ModelAndView();
+
+		if (reply.equals("n")) {
+			service.deleteService(board_no);
+		} else {
+			service.killSevice(board_no);
+			service.deleteWithReplyService(board_no);
+		}
+
+		mav.setViewName("redirect:/board.do?pageNum=" + pageNum);
+		return mav;
+	}
+
+	@RequestMapping("replyBoard.do")
+	public ModelAndView modifyBoard(int board_no, int pageNum) {
+		ModelAndView mav = new ModelAndView();
+		BoardVo vo = service.getContentService(board_no);
+		mav.addObject("content", vo);
+		mav.addObject("pageNum", pageNum);
+		mav.setViewName("boardReply");
+		return mav;
+	}
+
+	@RequestMapping("chkPassword.do") // 비밀번호 확인 페이지로 이동하는 메서드
+	public ModelAndView chkPassword(int board_no, int pageNum, String reply) {
+		ModelAndView mav = new ModelAndView();
+		mav.setViewName("chkPassword");
+		mav.addObject("reply", reply);
+		mav.addObject("board_no", board_no);
+		mav.addObject("pageNum", pageNum);
+		return mav;
+	}
+
+	@ResponseBody
+	@RequestMapping("chkPasswordProc.do") // 비밀번호를 확인해주는 메서드
+	public BoardVo chkPasswordProc(int board_no, int pageNum, String board_password, String reply) {
+		ModelAndView mav = new ModelAndView();
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("board_no", board_no);
+		map.put("pageNum", pageNum);
+		map.put("board_password", board_password);
+		map.put("reply", reply);
+		BoardVo vo = service.checkPasswordService(map);
+		try {
+			System.out.println(vo.getBoard_password());
+		} catch (NullPointerException e) {
+			BoardVo VO = new BoardVo();
+			VO.setBoard_password(
+					"098765432109876543210987654321098765432109876543210987654321098765432109876543210987654321098765432109876543210987654321");
+			return VO;
+		}
+		return vo;
+	}
+
+	@RequestMapping("boardReplyProc.do")
+	public ModelAndView boardReplyProc(BoardVo vo, int pageNum) {
+		System.out.println(vo.getBoard_no());
+		ModelAndView mav = new ModelAndView();
+
+		BoardVo paramVo = service.getRefStepDepthService(vo);
+		System.out.println("paramVo.ref : " + paramVo.getRef());
+		System.out.println("paramVo.step : " + paramVo.getStep());
+		System.out.println("paramVo.depth : " + paramVo.getDepth());
+		vo.setRef(paramVo.getRef());
+		vo.setStep(paramVo.getStep());
+		vo.setDepth(paramVo.getDepth());
+		vo.setReply("y");
+		service.replyOrNotService(vo);
+		vo.setReply("n");
+
+		Map<String, Integer> map = new HashMap<String, Integer>();
+		map.put("ref", paramVo.getRef());
+		map.put("step", paramVo.getStep());
+		service.stepUpService(map);
+
+		vo.setStep(vo.getStep() + 1);
+		vo.setDepth(vo.getDepth() + 1);
+
+		service.writeReplyService(vo);
+		mav.setViewName("redirect:/board.do?pageNum=" + pageNum);
+
+		return mav;
+	}
+
+	@RequestMapping("modifyContent.do")
+	public ModelAndView modify(BoardVo vo, int pageNum) {
+		ModelAndView mav = new ModelAndView();
+		BoardVo returnVo = service.getContentService(vo.getBoard_no());
+		mav.addObject("content", returnVo);
+		mav.addObject("pageNum", pageNum);
+		mav.setViewName("chkPasswordModify");
+		return mav;
+	}
+
+	@RequestMapping("chkPasswordModify.do")
+	@ResponseBody
+	public BoardVo chkPasswordModify(int board_no, int pageNum, String board_password) {
+		ModelAndView mav = new ModelAndView();
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("board_no", board_no);
+		map.put("pageNum", pageNum);
+		map.put("board_password", board_password);
+		BoardVo vo = service.checkPasswordService(map);
+		try {
+			System.out.println(vo.getBoard_password());
+		} catch (NullPointerException e) {
+			BoardVo VO = new BoardVo();
+			VO.setBoard_password(
+					"098765432109876543210987654321098765432109876543210987654321098765432109876543210987654321098765432109876543210987654321");
+			return VO;
+		}
+		return vo;
+	}
+
+	@RequestMapping("modify.do")
+	public ModelAndView modify(int board_no, int pageNum) {
+		ModelAndView mav = new ModelAndView();
+		BoardVo vo = service.getContentService(board_no);
+		mav.addObject("content", vo);
+		mav.addObject("pageNum", pageNum);
+		mav.setViewName("modify");
+		return mav;
+	}
+
+	@RequestMapping("modifyProc.do")
+	public ModelAndView modifyProc(int pageNum, BoardVo vo) {
+		ModelAndView mav = new ModelAndView();
+		service.modifyContentService(vo);
+		mav.setViewName("redirect:/getContent.do?pageNum=" + pageNum + "&board_no=" + vo.getBoard_no());
+		return mav;
+	}
+
+
+
+	@RequestMapping("search.do")
+	public ModelAndView search(Integer pageNum, String search) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		ModelAndView mav = new ModelAndView();
+		Criteria cri = new Criteria();
+		PageMaker pm = new PageMaker();
+
+		if (pageNum == null) {
+			pageNum = 1;
+		}
+		int count = service.searchCountService(search);
+
+		cri.setPage(pageNum);
+		cri.setPageStart();
+
+		pm.setCri(cri);
+		pm.setTotalCount(count);
+
+		map.put("startRow", cri.getStartRow());
+		map.put("search", search);
+
+		List<BoardVo> boardList = service.searchService(map);
+
+		for (BoardVo vo : boardList) {
+			System.out.println(vo.getBoard_title());
+		}
+
+		mav.addObject("cri", cri);
+		mav.addObject("pm", pm);
+		mav.addObject("boardList", boardList);
+		mav.addObject("count", count);
+		mav.addObject("search", search);
+		mav.setViewName("searchBoard");
+		return mav;
+	}
+
+	@RequestMapping("writeReply.do")
+	public ModelAndView writeReply(int pageNum, ReplyVo vo) {
+		ModelAndView mav = new ModelAndView();
+		service.writeReplyService(vo);
+		System.out.println("write reply board_no : "+vo.getBoard_no());
+		mav.addObject("pageNum", pageNum);
+		mav.addObject("content", vo);
+		mav.setViewName("redirect:/getContent.do?pageNum="+pageNum+"&board_no="+vo.getBoard_no());
+
+		return mav;
+	}
+
+	@RequestMapping("modifyReply")
+	public ModelAndView modifyReply(int pageNum, int board_no, int reply_no) {
+		ModelAndView mav = new ModelAndView();
+		mav.addObject("board_no", board_no);
+		mav.addObject("reply_no", reply_no);
+		mav.addObject("pageNum", pageNum);
+		mav.setViewName("modifyReplyPassword");
+		return mav;
+	}
+
+	@ResponseBody
+	@RequestMapping("chkPasswordReplyProc.do") // 비밀번호를 확인해주는 메서드
+	public ReplyVo chkPasswordReplyProc(int board_no, int pageNum, String reply_password, int reply_no) {
+		ModelAndView mav = new ModelAndView();
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("board_no", board_no);
+		map.put("pageNum", pageNum);
+		map.put("reply_password", reply_password);
+		map.put("reply_no", reply_no);
+		ReplyVo vo = service.replyModifyProcService(map);
+		try {
+			System.out.println("서비스를 통해 가져온 reply의 비밀번호  : " + vo.getReply_password());
+		} catch (NullPointerException e) {
+			ReplyVo VO = new ReplyVo();
+			VO.setReply_password(
+					"098765432109876543210987654321098765432109876543210987654321098765432109876543210987654321098765432109876543210987654321");
+			return VO;
+		}
+		return vo;
+	}
+
+	@RequestMapping("modifyReplyPage")
+	public ModelAndView modifyReplyPage(int board_no, int pageNum, int reply_no) {
+		ModelAndView mav = new ModelAndView();
+		System.out.println("넘겨주는 board_no : " + board_no);
+		mav.addObject("board_no", board_no);
+		mav.addObject("pageNum", pageNum);
+		mav.addObject("reply_no", reply_no);
+		mav.setViewName("replyModifyPage");
+		return mav;
+	}
+
+	@RequestMapping("replyUpdate")
+	public ModelAndView replyUpdate(int pageNum, int board_no, int reply_no, String reply_content) {
+		ModelAndView mav = new ModelAndView();
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("board_no", board_no);
+		map.put("reply_no", reply_no);
+		map.put("reply_content", reply_content);
+		service.replyUpdateService(map);
+
+		mav.setViewName("redirect:/getContent.do?pageNum=" + pageNum + "&board_no=" + board_no);
+		return mav;
+	}
+
+	@RequestMapping("deleteReply.do")
+	public ModelAndView deleteReply(int pageNum, int board_no, int reply_no) {
+		ModelAndView mav = new ModelAndView();
+		mav.addObject("pageNum", pageNum);
+		mav.addObject("board_no", board_no);
+		mav.addObject("reply_no", reply_no);
+		mav.setViewName("deleteReplyChk");
+		return mav;
+	}
+
+	@ResponseBody
+	@RequestMapping("deleteReplyPasswordChk.do") // 비밀번호를 확인해주는 메서드
+	public ReplyVo deleteReplyPasswordChk(int board_no, int pageNum, String reply_password, int reply_no) {
+		ModelAndView mav = new ModelAndView();
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("board_no", board_no);
+		map.put("pageNum", pageNum);
+		map.put("reply_password", reply_password);
+		map.put("reply_no", reply_no);
+		ReplyVo vo = service.replyModifyProcService(map);
+		try {
+			System.out.println("서비스를 통해 가져온 reply의 비밀번호  : " + vo.getReply_password());
+		} catch (NullPointerException e) {
+			ReplyVo VO = new ReplyVo();
+			VO.setReply_password(
+					"098765432109876543210987654321098765432109876543210987654321098765432109876543210987654321098765432109876543210987654321");
+			return VO;
+		}
+		return vo;
+	}
+
+	@RequestMapping("deleteProc.do")
+	public ModelAndView deleteProc(int pageNum, int board_no, int reply_no) {
+		ModelAndView mav = new ModelAndView();
+		Map<String, Integer> map = new HashMap<String, Integer>();
+		map.put("board_no", board_no);
+		map.put("reply_no", reply_no);
+		System.out.println("맵에 넣은 board_no : " + board_no);
+		System.out.println("맵에 넣은 reply_no : " + reply_no);
+		service.deleteReplyService(map);
+		System.out.println("댓글 삭제 완료");
+		mav.setViewName("redirect:/getContent.do?board_no=" + board_no + "&pageNum=" + pageNum);
+		return mav;
+	}
 }

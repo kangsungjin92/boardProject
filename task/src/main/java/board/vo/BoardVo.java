@@ -6,6 +6,7 @@ import lombok.Data;
 
 @Data
 public class BoardVo {
+	String board_writer;
 	int board_no;
 	String board_title;
 	String board_content;
@@ -16,4 +17,6 @@ public class BoardVo {
 	int depth;
 	int rnum;
 	String board_password;
+	String reply;
+	String kill;
 }

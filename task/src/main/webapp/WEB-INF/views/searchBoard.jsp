@@ -12,6 +12,13 @@
 <script src="http://code.jquery.com/jquery-latest.js"></script>
 <script type="text/javascript">
 	$(function() {
+		
+		//목록으로
+		$('#toList').click(function(){
+			location.href="/jin/board.do?pageNum=1";
+		});
+		
+		
 		$('.tTitle').css({
 			'display' : 'inline-block',
 			'overflow' : 'hidden',
@@ -25,8 +32,6 @@
 		$('#writeBtn').click(function(){
 			location.href="/jin/boardWrite.do?pageNum="+pageNum;
 		});
-		
-	
 	});//end whole function
 </script>
 
@@ -138,7 +143,6 @@ $(function(){
 					<tr>
 						<td>번호</td>
 						<td>제목</td>
-						<td>작성자</td>
 						<td>작성일</td>
 						<td>조회수</td>
 					</tr>
@@ -146,15 +150,13 @@ $(function(){
 				<tbody id="tablebody">
 					<c:choose>
 						<c:when test="${boardList ne null }">
-							<c:set var="num" value="${boardCnt - (cri.page-1)*cri.perPageNum}" />
+							<c:set var="num" value="${count - (cri.page-1)*cri.perPageNum}" />
 							<tbody id="tableBody">
 							<c:forEach var="board" items="${boardList}">
 								<tr>
 									<td>${num}</td>
 									
 									<c:choose>
-									
-									
 										<c:when test="${board.reply eq 'y' && board.kill eq 'y'}">
 											<td class="tTitle" style="text-align : left;color : red">
 											<c:if test="${board.depth >0 }">
@@ -164,12 +166,9 @@ $(function(){
 											</c:if>
 										<c:out value="${board.board_title }" escapeXml="true" />
 											</td>
-											
 											<td><fmt:formatDate value="${board.board_regdate }" type="both" pattern="yyyy-MM-dd"/></td>
 									<td>${board.viewCnt }</td>
 										</c:when>
-										
-										
 										
 										<c:otherwise>
 										<td class="tTitle" style="text-align : left;">
@@ -180,7 +179,6 @@ $(function(){
 									</c:if>
 										<a href="/jin/getContent.do?board_no=${board.board_no }&pageNum=${cri.page}" ><c:out value="${board.board_title }" escapeXml="true" /></a>
 									</td>
-									<td>${board.board_writer }</td>
 									<td><fmt:formatDate value="${board.board_regdate }" type="both" pattern="yyyy-MM-dd"/></td>
 									<td>${board.viewCnt }</td>
 										</c:otherwise>
@@ -204,11 +202,11 @@ $(function(){
 			<div id="pagingDiv" style="display: block; text-align: center;">
 				<c:if test="${pm.startPage != 1 }">
 					<a
-						href="/jin/board.do?pageNum=1">&lt;&lt;</a>
+						href="/jin/search.do?pageNum=1&search=${search }">&lt;&lt;</a>
 				</c:if>
 				<c:if test="${pm.startPage != 1 }">
 					<a
-						href="/jin/board.do?pageNum=${pm.startPage - 1 }">&lt;</a>
+						href="/jin/search.do?pageNum=${pm.startPage - 1 }&search=${search }">&lt;</a>
 				</c:if>
 				
 				<c:forEach begin="${pm.startPage }" end="${pm.endPage }" var="p">
@@ -217,20 +215,21 @@ $(function(){
 							<b>${p }</b>
 						</c:when>
 						<c:when test="${p != cri.page }">
-							<a href="/jin/board.do?pageNum=${p }">${p }</a>
+							<a href="/jin/search.do?pageNum=${p }&search=${search }">${p }</a>
 						</c:when>
 					</c:choose>
 				</c:forEach>
 				<c:if test="${pm.endPage != pm.tempEndPage}">
 					<a
-						href="/jin/board.do?pageNum=${pm.endPage+1 }">&gt;</a>
+						href="/jin/search.do?pageNum=${pm.endPage+1 }&search=${search }">&gt;</a>
 				</c:if>
 				<c:if test="${pm.endPage != pm.tempEndPage}">
 					<a
-						href="/jin/board.do?pageNum=${pm.tempEndPage }">&gt;&gt;</a>
+						href="/jin/search.do?pageNum=${pm.tempEndPage }&search=${search }">&gt;&gt;</a>
 				</c:if>
 			</div>
 			<input type="button" id="writeBtn" value="새글작성" />
+			<input type="button" id="toList" value="목록으로" />
 		</center>
 	</div>
 

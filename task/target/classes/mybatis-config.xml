@@ -8,10 +8,9 @@
 		<!-- <typeAlias type="blueup.admin.vo.ProductVo" alias="productvo"/>
 		<typeAlias type="blueup.admin.vo.ProductContentVo" alias="productcontentvo"/>
 		<typeAlias type="blueup.admin.vo.AdminCategoryDetailVo" alias="admincategorydetailvo"/> -->
-		<typeAlias type="board.vo.UserVo" alias="userVo"/>
 		<typeAlias type="board.vo.BoardVo" alias="boardVo"/>
+		<typeAlias type="board.vo.ReplyVo" alias="replyVo"/>
 		<typeAlias type="board.Criteria" alias="cri"/>
-		<typeAlias type="board.vo.BoardVo" alias="boardVo"/>
 		
 		
 	</typeAliases>
