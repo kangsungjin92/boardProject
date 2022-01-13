@@ -12,12 +12,27 @@
 <script type="text/javascript">
 
 $(function(){
+	
 	var value = $('#content').val().length;
 	$('#spanLength').text(value);
 
 	
+	
+	
+	
 	var pageNum = ${pageNum};
 	var board_no = ${content.board_no};
+	
+	
+	$('#board_writer').bind('propertychange change click keyup input paste', function(){
+		var inputLength = $(this).val().length;
+		var board_writer = $(this).val();
+		if(inputLength > 20){
+			var value = board_writer.substring(0,20);
+			alert('이름은 최대 20글자입니다.');
+			$('#board_writer').val(value);
+		}
+	});
 	
 	$('#toContent').click(function(){
 		location.href="/jin/getContent.do?pageNum="+ pageNum+"&board_no="+board_no;
@@ -73,6 +88,20 @@ function check(){
 		$('#content').focus();
 		return false;
 	}
+	var name = $('#board_writer').val().trim();
+	if(name==''){
+		alert('이름은 빈칸일 수 없습니다');
+		$('#board_writer').focus();
+		return false;
+	}
+	
+	name = $('#board_writer').val();
+	if(name.length>20){
+		alert('이름은 최대 20글자입니다.');
+		$('#board_writer').val('');
+		$('#board_writer').focus();
+		return false;
+	}
 	
 }
 
@@ -90,8 +119,9 @@ function check(){
 			<form action="/jin/modifyProc.do" method="post" onsubmit="return check();">
 				<input type="hidden" name="board_no" value="${content.board_no }" />
 				<input type="hidden" name="pageNum" value="${pageNum }" />
-				<input placeholder="제목을 입력해주세요(최대 100글자)" type="text" style="width: 500px; margin: 10px 0px;" id="title" name="board_title" value="<c:out value="${content.board_title }" escapeXml="true" />" /> <br>
-				<textarea class="textarea" id="content" name="board_content" style="width: 500px; height: 100px; resize : none;"placeholder="내용을 입력해주세요(최대 300글자)"><c:out value="${content.board_content }" escapeXml="true" /></textarea><br> 
+				<input type="text" style="width: 400px; margin: 10px 0px;" id="title" name="board_title" value="<c:out value="${content.board_title }" escapeXml="true" />" />
+				<input type="text" style="width: 100px; margin: 2px 0px 2px 0px;" id="board_writer" name="board_writer" value="<c:out value="${content.board_writer }" escapeXml = "true" />" /><br>
+				<textarea class="textarea" id="content" name="board_content" style="width: 500px; min-height: 200px; resize : none;"><c:out value="${content.board_content }" escapeXml="true" /></textarea><br> 
 				<p>내용 글자수 : <span id="spanLength">0</span>/300</p><br>
 				<input id="toContent" type="button" value="취소" />
 				<input type="submit" value="수정완료" />

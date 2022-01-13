@@ -83,7 +83,7 @@
 	
 	
 	<update id="modifyContent" parameterType="boardVo">
-		UPDATE BOARD SET BOARD_TITLE = #{board_title}, BOARD_CONTENT = #{board_content} WHERE BOARD_NO = #{board_no}
+		UPDATE BOARD SET BOARD_TITLE = #{board_title}, BOARD_CONTENT = #{board_content}, BOARD_WRITER = #{board_writer} WHERE BOARD_NO = #{board_no}
 	</update>
 	
 	<update id="replyOrNot" parameterType="boardVo">

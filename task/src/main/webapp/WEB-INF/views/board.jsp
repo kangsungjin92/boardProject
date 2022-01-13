@@ -41,26 +41,26 @@ table {
 	border-collapse: collapse;
 	border-spacing: 0;
 	border-color: grey;
+	table-layout: fixed;
 }
 
 
 
-tbody {
-	text-align: center;
+#tablebody {
+	text-align: left;
 	vertical-align: middle;
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
+
+
 a{
 	text-decoration : none;
 	color : black;
 	cursor : pointer;
 }
 
-.class{
-	width : 5px;
-	display : none;
-}
+
 
 </style>
 
@@ -77,63 +77,15 @@ $(function(){
 		location.href="/jin/search.do?search="+search;
 	});
 });
-	/* $(function(){
-		
 	
-		
-		
-		var pageNum = ${pageNum};
-		$('#searchBtn').click(function(){
-			var search = $('#search').val().trim();
-			if(search ==''){
-				alert('내용이 없습니다');
-				return;
-			}
-			
-			$.ajax({
-				type : "GET",
-				url : "/jin/search.do",
-				data : {
-					"search" : search,
-					"pageNum" : pageNum
-				},
-				success : function(data){
-					alert(data.search);
-					if(data.search==''){
-						$('#tableBody').empty();
-						$('#tableBody').append('<tr><td id="noResult">검색한 내용이 존재하지 않습니다</td></tr>');
-						$('#noResult').attr('colspan',4);
-						$('#boardTable').css({'width' : '600px'});
-					}else{
-						$('#tableBody').empty();
-						$('#boardTable').css({'width' : '600px'});
-						var list = data.search;
-						var str = '';
-						var count = data.count;
-						$.each(list, function(index, value){
-							str = '<tr>'
-							str += '<td>'+count+'</td>'
-							str += '<td>'+list.board_title+'</td>'
-							str += '<td>'+list.board_regdate+'</td>'
-							str += '<td>'+list.viewCnt+'</td>'
-							str+= '</tr>'
-							$('#tableBody').append(str);
-							count--;
-						});
-						
-					}
-				}
-			});
-		});
-	}); */
 
 </script>
 </head>
 <body>
-	<div id="wrap" width="200px">
+
 		<center>
 		<h1><a href="/jin/board.do?pageNum=1">게시판으로..</a></h1>
-			<table id="boardTable" border="1px solid black" id="boardTable">
+			<table id="boardTable"  border="1px solid black" id="boardTable">
 				<thead>
 					<tr>
 						<td>번호</td>
@@ -180,7 +132,7 @@ $(function(){
 									</c:if>
 										<a href="/jin/getContent.do?board_no=${board.board_no }&pageNum=${cri.page}" ><c:out value="${board.board_title }" escapeXml="true" /></a>
 									</td>
-									<td>${board.board_writer }</td>
+									<td id="tdWriter" style="max-width:80px; overflow: hidden; text-overflow : ellipsis; white-space : nowrap;"><c:out value="${board.board_writer }" escapeXml="true" /></td>
 									<td><fmt:formatDate value="${board.board_regdate }" type="both" pattern="yyyy-MM-dd"/></td>
 									<td>${board.viewCnt }</td>
 										</c:otherwise>
@@ -232,7 +184,7 @@ $(function(){
 			</div>
 			<input type="button" id="writeBtn" value="새글작성" />
 		</center>
-	</div>
+
 
 </body>
 </html>

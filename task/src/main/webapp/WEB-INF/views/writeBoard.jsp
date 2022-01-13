@@ -17,7 +17,15 @@
 		});
 		
 		
-		
+		$('#board_writer').bind('propertychange change click keyup input paste', function(){
+			var inputLength = $(this).val().length;
+			var board_writer = $(this).val();
+			if(inputLength > 20){
+				var value = board_writer.substring(0,20);
+				alert('이름은 최대 20글자입니다.');
+				$('#board_writer').val(value);
+			}
+		});
 
 		
 		$('#title').bind('propertychange change click keyup input paste', function(){
@@ -33,7 +41,7 @@
 		});
 		
 
-	
+		//시간남을 때 bind대신 on으로 바꿔보기
 		$('#content').bind("propertychange change click keyup input paste", function(){
 			var inputLength = $(this).val().length;
 			var content = $('#content').val();
@@ -73,7 +81,7 @@
 			
 			if(inputLength>100){
 				var value = content.substring(0,100);
-				alert('글자수는 100글자를 넘을 수 없습니다');
+				alert('비미번호는 최대 100글자입니다.');
 				$('#password').val(value);
 			}
 		});
@@ -99,6 +107,21 @@
 		}else if(content==''){
 			alert('내용은 빈칸일 수 없습니다.');
 			$('content').focus();
+			return false;
+		}
+		
+		var name = $('#board_writer').val().trim();
+		if(name==''){
+			alert('이름은 빈칸일 수 없습니다');
+			$('#board_writer').focus();
+			return false;
+		}
+		
+		name = $('#board_writer').val();
+		if(name.length>20){
+			alert('이름은 최대 20글자입니다.');
+			$('#board_writer').val('');
+			$('#board_writer').focus();
 			return false;
 		}
 		
@@ -155,8 +178,9 @@
 	<center>
 		<div id="wrap">
 			<form action="/jin/boardWriteProc.do" method="post" onsubmit="return check();">
-				<input type="text" style="width: 400px; margin: 2px 0px 2px 0px;" id="title" name="board_title" placeholder="제목을 입력해주세요" /><input type="text" style="width: 100px; margin: 2px 0px 2px 0px;" id="board_writer" name="board_writer" placeholder="이름을 입력해주세요" /><br>
-				<textarea class="textarea" id="content" name="board_content" style="width: 500px; height: 100px; resize : none;"placeholder="내용을 입력해주세요"></textarea><br> 
+				<input type="text" style="width: 400px; margin: 2px 0px 2px 0px;" id="title" name="board_title" placeholder="제목을 입력해주세요(최대 100글자)" />
+				<input type="text" style="width: 100px; margin: 2px 0px 2px 0px;" id="board_writer" name="board_writer" placeholder="이름을 입력해주세요" /><br>
+				<textarea class="textarea" id="content" name="board_content" style="width: 500px; min-height: 200px; resize : none;"placeholder="내용을 입력해주세요(최대 300글자)"></textarea><br> 
 				<input type="password" style="width: 500px;" id="password"name="board_password" placeholder="비밀번호는 영문, 숫자, 특수 문자가 포함된 8글자 ~ 100글자로 구성되어야합니다." /><br>
 				<span id="passwordValiChk" class="passWordSpan"></span><br>
 				<input type="hidden" name="reply" value="n" />

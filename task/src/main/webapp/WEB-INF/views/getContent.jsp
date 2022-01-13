@@ -126,12 +126,11 @@ $(function(){
 			<form action="/jin/modifyContent.do" method="post" >
 				<input type="hidden" name="board_no" value="${content.board_no }" />
 				<input type="hidden" name="pageNum" value="${pageNum }" />
-				<textarea readonly class="textarea" id="title" style="width : 500px; margin : 10px 0px;" name="board_title" ><c:out value="${content.board_title }" escapeXml="true" /></textarea>
-				<%-- <input type="text" readonly style="width: 500px; margin: 10px 0px;" id="title" name="board_title" value="<c:out value="${content.board_title }" escapeXml="true" />" /> <br> --%>
 				
+				작성자 : <c:out value="${content.board_writer }" escapeXml = "true" /><br>
+				<textarea readonly class="textarea" id="title" style="width : 500px; margin : 0px 0px 2px 0px;" name="board_title" ><c:out value="${content.board_title }" escapeXml="true" /></textarea><br>
 				
-				<textarea class="textarea" id="content" name="board_content" style=" width: 500px; height: 300px;" readonly><c:out value="${content.board_content }" escapeXml="true" /></textarea><br> 
-
+				<textarea class="textarea" id="content" name="board_content" style=" width: 500px; min-height: 200px;" readonly><c:out value="${content.board_content }" escapeXml="true" /></textarea><br> 
 				
 				<input id="delete" type="button" id="delete" value="삭제하기" />
 				<input id="toList" type="button" value="목록으로" />
