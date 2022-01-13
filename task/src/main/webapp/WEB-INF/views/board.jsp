@@ -163,6 +163,8 @@ $(function(){
 						href="/jin/board.do?pageNum=${pm.startPage - 1 }">&lt;</a>
 				</c:if>
 				
+				
+				
 				<c:forEach begin="${pm.startPage }" end="${pm.endPage }" var="p">
 					<c:choose>
 						<c:when test="${p == cri.page }">
@@ -173,6 +175,8 @@ $(function(){
 						</c:when>
 					</c:choose>
 				</c:forEach>
+				
+				
 				<c:if test="${pm.endPage != pm.tempEndPage}">
 					<a
 						href="/jin/board.do?pageNum=${pm.endPage+1 }">&gt;</a>
