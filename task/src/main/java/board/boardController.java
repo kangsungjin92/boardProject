@@ -51,7 +51,7 @@ public class boardController {
 		pm.setTotalCount(boardCnt);
 
 		boardList = service.getBoardListService(cri);
-		
+
 		mav.addObject("pageNum", pageNum);
 		mav.addObject("cri", cri);
 		mav.addObject("pm", pm);
@@ -112,14 +112,21 @@ public class boardController {
 	@RequestMapping("deleteBoard.do")
 	public ModelAndView deleteBoard(int pageNum, int board_no, String reply) {
 		ModelAndView mav = new ModelAndView();
-
-		if (reply.equals("n")) {
-			service.deleteService(board_no);
-		} else {
-			service.killSevice(board_no);
+		BoardVo vv = service.getContentService(board_no);
+		System.out.println("삭제를 위한 step : "+vv.getStep());
+		System.out.println("삭제를 위한 depth : "+vv.getDepth());
+		
+		//null이라면 답글이 없는 관계로 삭제 가능
+		BoardVo paramVo = service.getStepDepthForDeleteService(vv);
+		if (paramVo != null) {//null이 아니라면 답글이 존재하므로 삭제 불가
+			System.out.println("삭제 불가");
 			service.deleteWithReplyService(board_no);
+			service.deleteCommentWithDeletingBoardService(board_no);
+		} else {
+			System.out.println("삭제 가능");
+			service.deleteService(board_no);
+			service.deleteCommentWithDeletingBoardService(board_no);
 		}
-
 		mav.setViewName("redirect:/board.do?pageNum=" + pageNum);
 		return mav;
 	}
@@ -130,7 +137,36 @@ public class boardController {
 		BoardVo vo = service.getContentService(board_no);
 		mav.addObject("content", vo);
 		mav.addObject("pageNum", pageNum);
+
 		mav.setViewName("boardReply");
+		return mav;
+	}
+
+	@RequestMapping("boardReplyProc.do")
+	public ModelAndView boardReplyProc(BoardVo vo, int pageNum) {
+		System.out.println(vo.getBoard_no());
+		ModelAndView mav = new ModelAndView();
+
+		BoardVo paramVo = service.getRefStepDepthService(vo);
+
+		vo.setRef(paramVo.getRef());
+		vo.setStep(paramVo.getStep());
+		vo.setDepth(paramVo.getDepth());
+
+		Map<String, Integer> map = new HashMap<String, Integer>();
+		map.put("ref", paramVo.getRef());
+		map.put("step", paramVo.getStep());
+		service.stepUpService(map);
+
+		vo.setStep(vo.getStep() + 1);
+		vo.setDepth(vo.getDepth() + 1);
+		System.out.println("111111111111111");
+
+		service.ReplyCountUpService(vo);
+
+		service.writeReplyService(vo);
+		mav.setViewName("redirect:/board.do?pageNum=" + pageNum);
+
 		return mav;
 	}
 
@@ -163,36 +199,6 @@ public class boardController {
 			return VO;
 		}
 		return vo;
-	}
-
-	@RequestMapping("boardReplyProc.do")
-	public ModelAndView boardReplyProc(BoardVo vo, int pageNum) {
-		System.out.println(vo.getBoard_no());
-		ModelAndView mav = new ModelAndView();
-
-		BoardVo paramVo = service.getRefStepDepthService(vo);
-		System.out.println("paramVo.ref : " + paramVo.getRef());
-		System.out.println("paramVo.step : " + paramVo.getStep());
-		System.out.println("paramVo.depth : " + paramVo.getDepth());
-		vo.setRef(paramVo.getRef());
-		vo.setStep(paramVo.getStep());
-		vo.setDepth(paramVo.getDepth());
-		vo.setReply("y");
-		service.replyOrNotService(vo);
-		vo.setReply("n");
-
-		Map<String, Integer> map = new HashMap<String, Integer>();
-		map.put("ref", paramVo.getRef());
-		map.put("step", paramVo.getStep());
-		service.stepUpService(map);
-
-		vo.setStep(vo.getStep() + 1);
-		vo.setDepth(vo.getDepth() + 1);
-
-		service.writeReplyService(vo);
-		mav.setViewName("redirect:/board.do?pageNum=" + pageNum);
-
-		return mav;
 	}
 
 	@RequestMapping("modifyContent.do")
@@ -243,8 +249,6 @@ public class boardController {
 		return mav;
 	}
 
-
-
 	@RequestMapping("search.do")
 	public ModelAndView search(Integer pageNum, String search) {
 		Map<String, Object> map = new HashMap<String, Object>();
@@ -282,13 +286,17 @@ public class boardController {
 	}
 
 	@RequestMapping("writeReply.do")
-	public ModelAndView writeReply(int pageNum, ReplyVo vo) {
+	public ModelAndView writeReply(int pageNum, ReplyVo vo, int board_no) {
+		System.out.println("vo.getReplyWriter : " + vo.getReply_writer());
+		System.out.println("vo.getReplyContent : " + vo.getReply_content());
+		System.out.println("vo.getReplyPassword : " + vo.getReply_password());
 		ModelAndView mav = new ModelAndView();
 		service.writeReplyService(vo);
-		System.out.println("write reply board_no : "+vo.getBoard_no());
+		service.replyCountUpService(board_no);
+		System.out.println("write reply board_no : " + vo.getBoard_no());
 		mav.addObject("pageNum", pageNum);
 		mav.addObject("content", vo);
-		mav.setViewName("redirect:/getContent.do?pageNum="+pageNum+"&board_no="+vo.getBoard_no());
+		mav.setViewName("redirect:/getContent.do?pageNum=" + pageNum + "&board_no=" + vo.getBoard_no());
 
 		return mav;
 	}
@@ -336,12 +344,14 @@ public class boardController {
 	}
 
 	@RequestMapping("replyUpdate")
-	public ModelAndView replyUpdate(int pageNum, int board_no, int reply_no, String reply_content) {
+	public ModelAndView replyUpdate(int pageNum, int board_no, int reply_no, String reply_content, String reply_writer) {
 		ModelAndView mav = new ModelAndView();
+		System.out.println("수정을 위한 reply_writer : "+reply_writer);
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("board_no", board_no);
 		map.put("reply_no", reply_no);
 		map.put("reply_content", reply_content);
+		map.put("reply_writer", reply_writer);
 		service.replyUpdateService(map);
 
 		mav.setViewName("redirect:/getContent.do?pageNum=" + pageNum + "&board_no=" + board_no);
@@ -388,6 +398,7 @@ public class boardController {
 		System.out.println("맵에 넣은 board_no : " + board_no);
 		System.out.println("맵에 넣은 reply_no : " + reply_no);
 		service.deleteReplyService(map);
+		service.replyCountDownService(board_no);
 		System.out.println("댓글 삭제 완료");
 		mav.setViewName("redirect:/getContent.do?board_no=" + board_no + "&pageNum=" + pageNum);
 		return mav;

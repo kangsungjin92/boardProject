@@ -31,4 +31,10 @@ public interface boardService {
 	public ReplyVo replyModifyProcService(Map<String, Object> map);
 	public void replyUpdateService(Map<String, Object> map);
 	public void deleteReplyService(Map<String, Integer> map);
+	public void ReplyCountUpService(BoardVo vo);
+	public BoardVo getStepDepthForDeleteService(BoardVo vo);
+	public void deleteCommentWithDeletingBoardService(int board_no);
+	public int getReplyCountService(int board_no);
+	public void replyCountUpService(int board_no);
+	public void replyCountDownService(int board_no);
 }

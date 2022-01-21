@@ -144,6 +144,30 @@ public class BoardServiceImpl implements boardService {
 	public void deleteReplyService(Map<String, Integer> map) {
 		dao.deleteReplyDao(map);
 	}
+	@Override
+	public void ReplyCountUpService(BoardVo vo) {
+		dao.ReplyCountUpDao(vo);
+	}
+	@Override
+	public BoardVo getStepDepthForDeleteService(BoardVo vo) {
+		return dao.getStepDepthForDeleteDao(vo);
+	}
+	@Override
+	public void deleteCommentWithDeletingBoardService(int board_no) {
+		dao.deleteCommentWithDeletingBoardDao(board_no);
+	}
+	@Override
+	public int getReplyCountService(int board_no) {
+		return dao.getReplyCountDao(board_no);
+	}
+	@Override
+	public void replyCountUpService(int board_no) {
+		dao.replyCountUpDao(board_no);
+	}
+	@Override
+	public void replyCountDownService(int board_no) {
+		dao.replyCountDownDao(board_no);
+	}
 	
 	
 	

@@ -107,14 +107,17 @@ $(function(){
 									<c:choose>
 									
 									
-										<c:when test="${board.reply eq 'y' && board.kill eq 'y'}">
+										<c:when test="${board.board_content == ' '}">
 											<td class="tTitle" style="text-align : left;color : red">
 											<c:if test="${board.depth >0 }">
 												<c:forEach begin="1" end="${board.depth }">
 													&nbsp;&nbsp;
 												</c:forEach>
 											</c:if>
-										<c:out value="${board.board_title }" escapeXml="true" />
+										<c:out value="삭제된 게시물입니다.." escapeXml="true" />
+											</td>
+											<td>
+										<c:out value="${board.board_writer }" escapeXml="true" />	
 											</td>
 											
 											<td><fmt:formatDate value="${board.board_regdate }" type="both" pattern="yyyy-MM-dd"/></td>
@@ -130,7 +133,7 @@ $(function(){
 											&nbsp;&nbsp;
 										</c:forEach>
 									</c:if>
-										<a href="/jin/getContent.do?board_no=${board.board_no }&pageNum=${cri.page}" ><c:out value="${board.board_title }" escapeXml="true" /></a>
+										<a href="/jin/getContent.do?board_no=${board.board_no }&pageNum=${cri.page}" ><c:out value="${board.board_title }" escapeXml="true" /> [<span style="color : #ff7f00;">${board.reply_count }</span>]</a>
 									</td>
 									<td id="tdWriter" style="max-width:80px; overflow: hidden; text-overflow : ellipsis; white-space : nowrap;"><c:out value="${board.board_writer }" escapeXml="true" /></td>
 									<td><fmt:formatDate value="${board.board_regdate }" type="both" pattern="yyyy-MM-dd"/></td>

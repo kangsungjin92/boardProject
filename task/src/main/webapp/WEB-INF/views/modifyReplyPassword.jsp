@@ -33,6 +33,8 @@ $(function (){
 					location.href="/jin/modifyReplyPage.do?board_no="+board_no+'&reply_no='+reply_no+'&pageNum='+pageNum;
 				}else{
 					alert('비밀번호가 틀립니다');
+					$('#password').val('');
+					$('#password').focus();
 					return;
 				}
 			},

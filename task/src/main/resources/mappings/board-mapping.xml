@@ -13,9 +13,9 @@
 	<select id="getBoardListMapper" parameterType="cri" resultType="boardVo">
 		<![CDATA[
 		SELECT * FROM(
-    		SELECT BOARD_NO,BOARD_TITLE, BOARD_CONTENT, BOARD_REGDATE, VIEWCNT, REF, STEP, DEPTH, BOARD_PASSWORD, REPLY, KILL, BOARD_WRITER, ROWNUM as rnum 
+    		SELECT BOARD_NO,BOARD_TITLE, BOARD_CONTENT, BOARD_REGDATE, VIEWCNT, REF, STEP, DEPTH, BOARD_PASSWORD, REPLY, KILL, BOARD_WRITER, REPLY_COUNT, ROWNUM as rnum 
     		FROM(
-    			SELECT BOARD_NO,BOARD_TITLE, BOARD_CONTENT, BOARD_REGDATE, VIEWCNT, REF, STEP, DEPTH, BOARD_PASSWORD, REPLY, BOARD_WRITER, KILL
+    			SELECT BOARD_NO,BOARD_TITLE, BOARD_CONTENT, BOARD_REGDATE, VIEWCNT, REF, STEP, DEPTH, BOARD_PASSWORD, REPLY, BOARD_WRITER, KILL, REPLY_COUNT
     			FROM BOARD ORDER BY REF DESC, STEP ASC
         	)
     	)WHERE RNUM >= #{startRow} AND RNUM <= #{startRow}+9
@@ -26,7 +26,7 @@
 	<insert id="writeBoard" parameterType="boardVo">
 		INSERT INTO BOARD VALUES(
 			BOARD_SEC.NEXTVAL, #{board_title}, #{board_content}, SYSDATE, 0, NVL((SELECT MAX(REF)+1 FROM BOARD),0),
-			0,0, #{board_password}, #{reply}, 'n', #{board_writer}
+			0,0, #{board_password}, #{reply}, 'n', #{board_writer}, 0, 0
 		)
 	</insert>
 	
@@ -43,7 +43,7 @@
 	</delete>
 	
 	<update id="deleteWithReply" parameterType="int">
-		UPDATE BOARD SET BOARD_TITLE = '삭제된 게시물입니다', BOARD_PASSWORD = 'deleted'
+		UPDATE BOARD SET BOARD_TITLE = ' ', BOARD_CONTENT = ' ', BOARD_PASSWORD = ' ', BOARD_WRITER = ' '
 		WHERE BOARD_NO = #{board_no}
 	</update>
 	
@@ -72,8 +72,8 @@
 	
 	<insert id="writeReply" parameterType="boardVo">
 		INSERT INTO BOARD VALUES(
-			BOARD_SEC.NEXTVAL, #{board_title}, #{board_content}, SYSDATE, 0, #{ref},#{step},
-			#{depth}, #{board_password}, #{reply}, 'n'
+			BOARD_SEC.NEXTVAL, #{board_title}, #{board_content}, SYSDATE, 0, #{ref}, #{step},
+			#{depth}, #{board_password}, #{reply}, 'n',#{board_writer}, 0, 0
 		)
 	</insert>
 	
@@ -93,9 +93,9 @@
 	<select id="search" parameterType="hashmap" resultType="boardVo">
 	<![CDATA[
 		SELECT * FROM(
-    		SELECT BOARD_NO,BOARD_TITLE, BOARD_CONTENT, BOARD_REGDATE, VIEWCNT, REF, STEP, DEPTH, BOARD_PASSWORD, REPLY, KILL ,ROWNUM as rnum 
+    		SELECT BOARD_NO,BOARD_TITLE, BOARD_CONTENT, BOARD_REGDATE, VIEWCNT, REF, STEP, DEPTH, BOARD_PASSWORD, REPLY, KILL , BOARD_WRITER, ROWNUM as rnum 
     		FROM(
-    			SELECT BOARD_NO,BOARD_TITLE, BOARD_CONTENT, BOARD_REGDATE, VIEWCNT, REF, STEP, DEPTH, BOARD_PASSWORD, REPLY, KILL
+    			SELECT BOARD_NO,BOARD_TITLE, BOARD_CONTENT, BOARD_REGDATE, VIEWCNT, REF, STEP, DEPTH, BOARD_PASSWORD, REPLY, KILL, BOARD_WRITER
     			FROM BOARD WHERE BOARD_TITLE LIKE '%'||#{search}||'%' ORDER BY REF DESC, STEP ASC
         	)
     	)WHERE RNUM >= #{startRow} AND RNUM <= #{startRow}+9
@@ -108,12 +108,12 @@
 	</select>
 	
 	<select id="getReplies" parameterType="boardVo" resultType="replyVo">
-		SELECT * FROM REPLY WHERE BOARD_NO = #{board_no} order by REF ASC
+		SELECT * FROM REPLY WHERE BOARD_NO = #{board_no} order by REF DESC
 	</select>
 	
 	<insert id="writeReplyInContent" parameterType="replyVo">
-		INSERT INTO REPLY VALUES(REPLY_SEQ.NEXTVAL, #{board_no}, #{reply_content}, #{reply_password}, SYSDATE, 
-		NVL((SELECT MAX(REF)+1 FROM REPLY),0), 0, 0)
+		INSERT INTO REPLY VALUES(REPLY_SEQ.NEXTVAL, #{board_no} ,#{reply_content}, #{reply_password}, SYSDATE, 
+		NVL((SELECT MAX(REF)+1 FROM REPLY),0), 0, 0, #{reply_writer})
 	</insert>
 	
 	<select id="replyModifyProc" parameterType="hashmap" resultType="replyVo">
@@ -121,7 +121,7 @@
 	</select>
 	
 	<update id="replyUpdate" parameterType="hashmap">
-		UPDATE REPLY SET REPLY_CONTENT = #{reply_content} WHERE BOARD_NO = #{board_no} AND REPLY_NO = #{reply_no}
+		UPDATE REPLY SET REPLY_CONTENT = #{reply_content}, REPLY_WRITER = #{reply_writer} WHERE BOARD_NO = #{board_no} AND REPLY_NO = #{reply_no}
 	</update>
 	
 	<delete id="deleteReply" parameterType="hashmap">
@@ -131,4 +131,31 @@
 	<delete id="deleteReplyWIthDeleteContent" parameterType="int">
 		DELETE FROM REPLY WHERE BOARD_NO = #{board_no}
 	</delete>
+	
+	<update id="ReplyCountUp" parameterType="boardVo">
+		UPDATE BOARD SET COUNT = COUNT+1 WHERE BOARD_NO = #{board_no}
+	</update>
+	
+	<!-- 계층형 게시판에서 삭제 처리를 위해 자신의 step, depth 보다 1이 많은 것들을 가져온다.
+	존재한다면 답글이 존재한다는 의미이므로 게시글 삭제를 진행하지 않고 제목을 ' ' 처리 해준다 -->
+	<select id="getStepDepthForDelete" parameterType="boardVo" resultType="boardVo">
+		SELECT STEP DEPTH FROM BOARD WHERE STEP = #{step}+1 AND DEPTH = #{depth} +1 AND REF = #{ref}
+	</select>
+	
+	<!--게시글이 삭제됨에 따라 댓글도 삭제되게  -->
+	<delete id="deleteCommentWithDeletingBoard" parameterType="int">
+		DELETE FROM REPLY WHERE BOARD_NO = #{board_no}
+	</delete>
+	
+	<select id="getReplyCount" parameterType="int" resultType="Integer">
+		SELECT COUNT(REPLY_NO) FROM REPLY WHERE BOARD_NO = #{board_no}
+	</select>
+	
+	<update id="replyCountUp" parameterType="int">
+		UPDATE BOARD SET REPLY_COUNT = REPLY_COUNT+1 WHERE BOARD_NO = #{board_no}
+	</update>
+	
+	<update id="replyCountDown" parameterType="int">
+		UPDATE BOARD SET REPLY_COUNT = REPLY_COUNT-1 WHERE BOARD_NO = #{board_no}
+	</update>
 </mapper>

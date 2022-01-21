@@ -23,7 +23,10 @@
 		$('.passWordSpan').css({
 			'display' : 'none'
 		});
-		$('#title').keyup(function(){
+
+		
+		
+		$('#title').bind("propertychange change click keyup input paste", function(){
 			var inputLength = $(this).val().length;
 			var title = $('#title').val();
 			if(inputLength>100){
@@ -31,13 +34,24 @@
 				alert('제목은 100글자를 넘길 수 없습니다');
 				$('#title').val(value);
 			}
-		})
+		});
+		
+		$('#board_writer').bind('propertychange change click keyup input paste', function(){
+			var inputLength = $(this).val().length;
+			var board_writer = $(this).val();
+			if(inputLength > 20){
+				var value = board_writer.substring(0,20);
+				alert('이름은 최대 20글자입니다.');
+				$('#board_writer').val(value);
+			}
+		});
 		
 		$('#cancel').click(function(){
 			location.href = '/jin/getContent.do?pageNum='+pageNum+'&board_no='+board_no;
 		});
+
 		
-		$('#content').keyup(function(){
+		$('#content').bind("propertychange change click keyup input paste", function(){
 			var inputLength = $(this).val().length;
 			var content = $('#content').val();
 			$('#spanInputLength').text(inputLength);
@@ -48,8 +62,9 @@
 				$('#spanInputLength').text('300');
 			}
 		});
+
 		
-		$('#password').keyup(function(){
+		$('#password').bind("propertychange change click keyup input paste", function(){
 			var inputLength = $(this).val().length;
 			var password = $('#password').val();
 			if(inputLength >100){
@@ -59,7 +74,10 @@
 			}
 		});
 		
-		$('#password').keyup(function(){
+
+		
+		
+		$('#password').bind("propertychange change click keyup input paste", function(){
 			$('#passwordValiChk').css({
 				'display' : 'none'
 			});
@@ -78,27 +96,12 @@
 					'display' : 'inline'
 				});
 			}
-			
-			
 		});
 		
-		$('#passwordChk').keyup(function(){
-			var password = $('#password').val();
-			var passwordChk = $('#passwordChk').val();
-			if(password == passwordChk){
-				$('#chkSpan').text('비밀번호가 일치합니다');
-				$('#chkSpan').css({
-					'display' : 'inline',
-					'color' : 'green'
-				});
-			}else{
-				$('#chkSpan').text('비밀번호가 일치하지 않습니다');
-				$('#chkSpan').css({
-					'display' : 'inline',
-					'color' : 'red'
-				});
-			}
-		});
+		
+		
+		
+		
 		
 		
 		autosize($('.textarea'));
@@ -122,6 +125,22 @@
 			alert('내용은 빈칸일 수 없습니다');
 			$('#content').val('');
 			$('#content').focus();
+			return false;
+		}
+		
+		
+		var name = $('#board_writer').val().trim();
+		if(name==''){
+			alert('이름은 빈칸일 수 없습니다');
+			$('#board_writer').focus();
+			return false;
+		}
+		
+		name = $('#board_writer').val();
+		if(name.length>20){
+			alert('이름은 최대 20글자입니다.');
+			$('#board_writer').val('');
+			$('#board_writer').focus();
 			return false;
 		}
 		
@@ -173,11 +192,11 @@
 			<form action="/jin/boardReplyProc.do" method="post" onsubmit="return check();">
 				<input type="hidden" name="board_no" value="${content.board_no }"/>
 				<input type="hidden" name="pageNum" value="${pageNum }" />
-				<input type="text" style="width: 500px; margin: 10px 0px;" id="title" name="board_title" value="<c:out value="${content.board_title }" escapeXml="true" />" /><br>
-				<textarea class="textarea" id="content" name="board_content" style="width: 500px; height: 300px; resize : none;"placeholder="내용을 입력해주세요"><c:out value="${content.board_content }" escapeXml="true" /></textarea><br> 
-				<input type="password" style="width: 300px;" id="password"name="board_password" placeholder="비밀번호를 입력해주세요" /><br>
-				<input type="password" style="width: 300px;" id="passwordChk" name="board_passwordChk" placeholder="비밀번호 확인" /><br>
-				<span id="chkSpan" class="passWordSpan"></span><br>
+				<input type="text" style="width: 400px; margin: 10px 0px;" id="title" name="board_title" value="<c:out value="${content.board_title }" escapeXml="true" />" />
+				<input type="text" style="width:100px;" id="board_writer" name="board_writer" placeholder="이름을 입력해주세요" /><br>
+				<textarea class="textarea" id="content" name="board_content" style="width: 500px; min-height: 200px; resize : none;"placeholder="내용을 입력해주세요"><c:out value="${content.board_content }" escapeXml="true" /></textarea><br> 
+				<input type="password" style="width: 300px;" id="password"name="board_password" placeholder="비밀번호는 영문, 숫자, 특수 문자가 포함된 8글자 ~ 100글자로 구성되어야합니다." /><br>
+				<span id="passwordValiChk" class="passWordSpan"></span><br>
 				<input type="hidden" name="reply" value="n" />
 				<input id="cancel" type="button" value="취소" /> 
 				<input type="submit" value="등록" />

@@ -19,4 +19,6 @@ public class BoardVo {
 	String board_password;
 	String reply;
 	String kill;
+	int count;
+	int reply_count;
 }

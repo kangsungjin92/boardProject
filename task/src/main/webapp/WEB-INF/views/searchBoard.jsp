@@ -138,11 +138,12 @@ $(function(){
 	<div id="wrap" width="200px">
 		<center>
 		<h1><a href="/jin/board.do?pageNum=1">게시판으로..</a></h1>
-			<table id="boardTable" border="1px solid black" id="boardTable">
+			<table style="min-width : 500px;" id="boardTable" border="1px solid black" id="boardTable">
 				<thead>
 					<tr>
 						<td>번호</td>
 						<td>제목</td>
+						<td>작성자</td>
 						<td>작성일</td>
 						<td>조회수</td>
 					</tr>
@@ -166,6 +167,7 @@ $(function(){
 											</c:if>
 										<c:out value="${board.board_title }" escapeXml="true" />
 											</td>
+											<td id="tdWriter" style="max-width:80px; overflow: hidden; text-overflow : ellipsis; white-space : nowrap;"><c:out value="${board.board_writer }" escapeXml="true" /></td>
 											<td><fmt:formatDate value="${board.board_regdate }" type="both" pattern="yyyy-MM-dd"/></td>
 									<td>${board.viewCnt }</td>
 										</c:when>
@@ -179,6 +181,7 @@ $(function(){
 									</c:if>
 										<a href="/jin/getContent.do?board_no=${board.board_no }&pageNum=${cri.page}" ><c:out value="${board.board_title }" escapeXml="true" /></a>
 									</td>
+									<td id="tdWriter" style="max-width:80px; overflow: hidden; text-overflow : ellipsis; white-space : nowrap;"><c:out value="${board.board_writer }" escapeXml="true" /></td>
 									<td><fmt:formatDate value="${board.board_regdate }" type="both" pattern="yyyy-MM-dd"/></td>
 									<td>${board.viewCnt }</td>
 										</c:otherwise>

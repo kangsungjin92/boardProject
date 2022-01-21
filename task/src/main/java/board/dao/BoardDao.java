@@ -115,4 +115,28 @@ public class BoardDao {
 	public void deleteReplyWIthDeleteContentDao(int board_no) {
 		sqlSessionTemplate.delete("boardMapper.deleteReplyWIthDeleteContent", board_no);
 	}
+	
+	public void ReplyCountUpDao(BoardVo vo) {
+		sqlSessionTemplate.update("boardMapper.ReplyCountUp", vo);
+	} 
+	
+	public BoardVo getStepDepthForDeleteDao(BoardVo vo) {
+		return sqlSessionTemplate.selectOne("boardMapper.getStepDepthForDelete", vo);
+	}
+	
+	public void deleteCommentWithDeletingBoardDao(int board_no) {
+		sqlSessionTemplate.delete("boardMapper.deleteCommentWithDeletingBoard", board_no);
+	}
+	
+	public int getReplyCountDao(int board_no) {
+		return sqlSessionTemplate.selectOne("boardMapper.getReplyCount", board_no);
+	}
+	
+	public void replyCountUpDao(int board_no) {
+		sqlSessionTemplate.update("boardMapper.replyCountUp", board_no);
+	}
+	
+	public void replyCountDownDao(int board_no) {
+		sqlSessionTemplate.update("boardMapper.replyCountDown", board_no);
+	}
 }
