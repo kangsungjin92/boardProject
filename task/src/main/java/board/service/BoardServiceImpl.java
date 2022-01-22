@@ -168,6 +168,10 @@ public class BoardServiceImpl implements boardService {
 	public void replyCountDownService(int board_no) {
 		dao.replyCountDownDao(board_no);
 	}
+	@Override
+	public ReplyVo getReplyService(Map<String, Integer> map) {
+		return dao.getReplyDao(map);
+	}
 	
 	
 	

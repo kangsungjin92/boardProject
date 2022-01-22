@@ -46,7 +46,13 @@ $(function (){
 			dataType : 'JSON',
 			success : function(data){
 				if(password == data.board_password){
-					location.href="/jin/deleteBoard.do?board_no="+board_no+'&reply='+reply+'&pageNum='+pageNum;
+					if(confirm('정말 삭제하시겠습니까?')){
+						location.href="/jin/deleteBoard.do?board_no="+board_no+'&reply='+reply+'&pageNum='+pageNum;
+					}else{
+						$('#password').val('');
+						$('#password').focus();
+						return;
+					}
 				}else if(password != data.board_password){
 					alert('잘못된 비밀번호입니다.');
 					$('#password').val('');

@@ -37,4 +37,5 @@ public interface boardService {
 	public int getReplyCountService(int board_no);
 	public void replyCountUpService(int board_no);
 	public void replyCountDownService(int board_no);
+	public ReplyVo getReplyService(Map<String, Integer> map);
 }

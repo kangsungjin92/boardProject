@@ -158,4 +158,8 @@
 	<update id="replyCountDown" parameterType="int">
 		UPDATE BOARD SET REPLY_COUNT = REPLY_COUNT-1 WHERE BOARD_NO = #{board_no}
 	</update>
+	
+	<select id="getReply" parameterType="hashmap" resultType="replyVo">
+		SELECT * FROM REPLY WHERE REPLY_NO = #{reply_no} AND BOARD_NO = #{board_no} 
+	</select>
 </mapper>

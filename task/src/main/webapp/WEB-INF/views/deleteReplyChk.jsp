@@ -34,7 +34,13 @@ $(function (){
 			dataType : 'JSON',
 			success : function(data){
 				if(password == data.reply_password){
-					location.href="/jin/deleteProc.do?board_no="+board_no+'&reply_no='+reply_no+'&pageNum='+pageNum;
+					if(confirm('정말 삭제하시겠습니까?')){
+						location.href="/jin/deleteProc.do?board_no="+board_no+'&reply_no='+reply_no+'&pageNum='+pageNum;
+					}else{
+						$('#password').val('');
+						$('#password').focus();
+						return;
+					}
 				}else{
 					alert('비밀번호가 틀립니다');
 					return;

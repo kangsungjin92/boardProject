@@ -98,8 +98,8 @@
 				<input type="hidden" name="board_no" value="${board_no }" />
 				<input type="hidden" name="pageNum" value="${pageNum }" />
 				<input type="hidden" name="reply_no" value="${reply_no }" />
-				<input id="reply_writer" name="reply_writer" type="text" style="width : 100px;" placeholder="이름을  입력해주세요" />
-				<input type="text" style="width: 400px; margin: 10px 0px;" id="reply_content" name="reply_content" placeholder="내용을 입력해주세요" /><br>
+				<input id="reply_writer" name="reply_writer" type="text" style="width : 100px;" placeholder="이름을  입력해주세요" value="${vo.reply_writer }"/>
+				<input type="text" style="width: 400px; margin: 10px 0px;" id="reply_content" name="reply_content" placeholder="내용을 입력해주세요" value="${vo.reply_content }" /><br>
 				<input id="cancel" type="button" value="취소" /> 
 				<input type="submit" value="등록" />
 			</form>

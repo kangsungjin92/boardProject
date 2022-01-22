@@ -3,6 +3,7 @@ package board;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -51,6 +52,10 @@ public class boardController {
 		pm.setTotalCount(boardCnt);
 
 		boardList = service.getBoardListService(cri);
+		
+		for(BoardVo vo : boardList) {
+			System.out.println("가져온 타이틀 정보 : "+vo.getBoard_title());
+		}
 
 		mav.addObject("pageNum", pageNum);
 		mav.addObject("cri", cri);
@@ -304,6 +309,7 @@ public class boardController {
 	@RequestMapping("modifyReply")
 	public ModelAndView modifyReply(int pageNum, int board_no, int reply_no) {
 		ModelAndView mav = new ModelAndView();
+		
 		mav.addObject("board_no", board_no);
 		mav.addObject("reply_no", reply_no);
 		mav.addObject("pageNum", pageNum);
@@ -336,6 +342,14 @@ public class boardController {
 	public ModelAndView modifyReplyPage(int board_no, int pageNum, int reply_no) {
 		ModelAndView mav = new ModelAndView();
 		System.out.println("넘겨주는 board_no : " + board_no);
+		Map<String, Integer> map = new HashMap<String, Integer>();
+		map.put("board_no", board_no);
+		map.put("reply_no", reply_no);
+		ReplyVo vo = service.getReplyService(map);
+		System.out.println(1);
+		System.out.println("수정을 위한 replyVo.writer : "+vo.getReply_writer());
+		System.out.println("수정을 위한 replyVo.content : "+vo.getReply_content());
+		mav.addObject("vo", vo);
 		mav.addObject("board_no", board_no);
 		mav.addObject("pageNum", pageNum);
 		mav.addObject("reply_no", reply_no);

@@ -93,6 +93,8 @@ $(function(){
 		var reply_content = $('#reply_content').val();
 		var reply_writer = $('#reply_writer').val();
 		var reply_password = $('#reply_password').val();
+		
+		
 		if(reply_writer.trim()==''){
 			alert('작성자는 빈칸일 수 없습니다');
 			$('#reply_writer').focus();
@@ -177,18 +179,19 @@ $(function(){
 			
 			
 			<center>
-		 <div style="width : 600px;">
-		 <form>
-		 	<input type="text" style="width : 100px" id="reply_writer" name="reply_writer" placeholder="작성자 이름" />
-			<input style="width : 250px;" type="text" name="reply_content" id="reply_content" placeholder="댓글은 마음의 창입니다" /><br>
+		
+			
+			<h1>댓글</h1>
+			
+			 <form>
+		 	<input type="text" style="width : 100px" id="reply_writer" name="reply_writer" placeholder="작성자 이름" autocomplete='off'/>
+			<input style="width : 250px;" type="text" name="reply_content" id="reply_content" placeholder="댓글은 마음의 창입니다" autocomplete='off'/><br>
 			<input style="width : 100px;" type="password" id="reply_password" name="reply_password" placeholder="비밀번호" />
-			<br>
+			<br><input type="button" id="replyBtn" value="등록하기 " /><br>
 			댓글 글자수 <span id="spanInputLength">0</span>/50<br>
 			<span id="spanPasswordChk" style="display:none;"></span>
 			</form>
-			<input type="button" id="replyBtn" value="등록하기 " />
-			<h1>댓글</h1>
-			<table width="800px" style="text-align:center">
+			<table width="1100px" style="text-align:center">
 				<thead>
 					<tr>
 						<td class="line" >내용</td>
@@ -202,8 +205,8 @@ $(function(){
 				<tbody id="replyTableBody">
 					<c:forEach var="reply" items="${replyList }" >
 						<tr>
-							<td style="text-align:left;" class="line" width="350" style="text-align : left"><c:out value="${reply.reply_content }" escapeXml="true" /></td>
-							<td style="max-width:100px; overflow: hidden; text-overflow : ellipsis; white-space : nowrap;" width="100" class="line" id="reply_writer"><c:out value="${reply.reply_writer }" escapeXml="true" /></td>
+							<td class="line" width="500" style="text-align : left; white-space : pre;"><c:out value="${reply.reply_content }" escapeXml="true" /></td>
+							<td style="white-space : pre; width : 200px;" class="line" id="reply_writer"><c:out value="${reply.reply_writer }" escapeXml="true" /></td>
 							<td class="line" width="200"><fmt:formatDate value="${reply.regdate }" type="both" pattern="yyyy-MM-dd"/> </td>
 							<td class="line" width="100"><a style="text-decoration : none;color:black;" href="/jin/modifyReply.do?board_no=${content.board_no }&reply_no=${reply.reply_no }&pageNum=${pageNum }">수정</a></td>
 							<td class="line" width="100"><a style="text-decoration : none;color:black;" href="/jin/deleteReply.do?board_no=${content.board_no }&reply_no=${reply.reply_no }&pageNum=${pageNum }">삭제</a></td>
@@ -211,7 +214,6 @@ $(function(){
 					</c:forEach>
 				</tbody>
 			</table>
-			</div>
 	</center>
 		</div>
 	</center>

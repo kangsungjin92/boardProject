@@ -12,14 +12,14 @@
 <script src="http://code.jquery.com/jquery-latest.js"></script>
 <script type="text/javascript">
 	$(function() {
-		$('.tTitle').css({
+		/* $('.tTitle').css({
 			'display' : 'inline-block',
 			'overflow' : 'hidden',
 		  	'text-overflow' : 'ellipsis',
 		  	'white-space' : 'nowrap',
 		  	'width': '400px',
 		  	'height': '20px'
-		});
+		}); */
 		var pageNum = ${cri.page};
 
 		$('#writeBtn').click(function(){
@@ -44,14 +44,6 @@ table {
 	table-layout: fixed;
 }
 
-
-
-#tablebody {
-	text-align: left;
-	vertical-align: middle;
-	overflow: hidden;
-	text-overflow: ellipsis;
-}
 
 
 a{
@@ -127,14 +119,7 @@ $(function(){
 										
 										
 										<c:otherwise>
-										<td class="tTitle" style="text-align : left;">
-									<c:if test="${board.depth >0 }">
-										<c:forEach begin="1" end="${board.depth }">
-											&nbsp;&nbsp;
-										</c:forEach>
-									</c:if>
-										<a href="/jin/getContent.do?board_no=${board.board_no }&pageNum=${cri.page}" ><c:out value="${board.board_title }" escapeXml="true" /> [<span style="color : #ff7f00;">${board.reply_count }</span>]</a>
-									</td>
+										<td class="tTitle" style="width:300px; max-width:300px; overflow: hidden; text-overflow : ellipsis; white-space : pre; text-align : left;"><c:if test="${board.depth >0 }"><c:forEach begin="1" end="${board.depth }">&nbsp;&nbsp;</c:forEach>→</c:if><a href="/jin/getContent.do?board_no=${board.board_no }&pageNum=${cri.page}" ><c:out value="${board.board_title }" escapeXml="true" /> [<span style="color : #ff7f00;">${board.reply_count }</span>]</a></td>
 									<td id="tdWriter" style="max-width:80px; overflow: hidden; text-overflow : ellipsis; white-space : nowrap;"><c:out value="${board.board_writer }" escapeXml="true" /></td>
 									<td><fmt:formatDate value="${board.board_regdate }" type="both" pattern="yyyy-MM-dd"/></td>
 									<td>${board.viewCnt }</td>

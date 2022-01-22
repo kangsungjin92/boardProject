@@ -139,4 +139,8 @@ public class BoardDao {
 	public void replyCountDownDao(int board_no) {
 		sqlSessionTemplate.update("boardMapper.replyCountDown", board_no);
 	}
+	
+	public ReplyVo getReplyDao(Map<String, Integer> map) {
+		return sqlSessionTemplate.selectOne("boardMapper.getReply", map);
+	}
 }

@@ -113,6 +113,9 @@
 	//validation
 	function check(){
 		
+		if(!confirm('비밀번호는 변경하실 수 없습니다. 계속하시겠습니까?')){
+			return false;
+		}
 		//공백 체크
 		var title = $('#title').val().trim();
 		var content = $('#content').val().trim();
@@ -175,8 +178,6 @@
 		}
 		
 
-		
-		
 	}
 </script>
 <style>
@@ -192,9 +193,9 @@
 			<form action="/jin/boardReplyProc.do" method="post" onsubmit="return check();">
 				<input type="hidden" name="board_no" value="${content.board_no }"/>
 				<input type="hidden" name="pageNum" value="${pageNum }" />
-				<input type="text" style="width: 400px; margin: 10px 0px;" id="title" name="board_title" value="<c:out value="${content.board_title }" escapeXml="true" />" />
+				<input type="text" style="width: 400px; margin: 10px 0px;" id="title" name="board_title" placeholder="제목을 입력해주세요" />
 				<input type="text" style="width:100px;" id="board_writer" name="board_writer" placeholder="이름을 입력해주세요" /><br>
-				<textarea class="textarea" id="content" name="board_content" style="width: 500px; min-height: 200px; resize : none;"placeholder="내용을 입력해주세요"><c:out value="${content.board_content }" escapeXml="true" /></textarea><br> 
+				<textarea class="textarea" id="content" name="board_content" style="width: 500px; min-height: 200px; resize : none;"placeholder="내용을 입력해주세요"></textarea><br> 
 				<input type="password" style="width: 300px;" id="password"name="board_password" placeholder="비밀번호는 영문, 숫자, 특수 문자가 포함된 8글자 ~ 100글자로 구성되어야합니다." /><br>
 				<span id="passwordValiChk" class="passWordSpan"></span><br>
 				<input type="hidden" name="reply" value="n" />
